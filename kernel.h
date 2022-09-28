@@ -34,11 +34,11 @@ void kernel(sycl::stream out, sycl::nd_item<1> item, uint16_t const* __restrict_
           break;
         }
       }
-      //Hist::Counter ws[32];
-      //auto wsbuff = sycl::ext::oneapi::group_local_memory_for_overwrite<uint32_t[32]>(item.get_group());
-      //uint32_t* ws = (uint32_t*)wsbuff.get();
-      //auto histbuff = sycl::ext::oneapi::group_local_memory_for_overwrite<Hist>(item.get_group());
-      //Hist* hist = (Hist*)histbuff.get();
+      
+      // auto wsbuff = sycl::ext::oneapi::group_local_memory_for_overwrite<uint32_t[32]>(item.get_group());
+      // uint32_t* ws = (uint32_t*)wsbuff.get();
+      // auto histbuff = sycl::ext::oneapi::group_local_memory_for_overwrite<Hist>(item.get_group());
+      // Hist* hist = (Hist*)histbuff.get();
     
       for (auto j = item.get_local_id(0); j < Hist::totbins(); j += item.get_local_range(0)) {
         hist->off[j] = 0;
@@ -63,70 +63,14 @@ void kernel(sycl::stream out, sycl::nd_item<1> item, uint16_t const* __restrict_
       }
       item.barrier();
       
-      //output the sum of off[] for each block
-//      int sum = 0;
-//      for (auto j = 0; j < (int)Hist::totbins(); j ++) {
-//        if (id[j] == 9999 && j >= (int)Hist::totbins()) {  // skip invalid pixels
-//          continue;
-//        }
-//      
-//        sum+=hist->off[j];
-//      }
-//      item.barrier();
-//      if (item.get_local_id(0)==0)
-//      out << sum << " ";
 
-//       for (int i = first; i < *msize; i += item.get_local_range(0)) {
-//       out << hist->off[y[i]] << " ";
-//      }
-//      
-//      //item.barrier();
-     // if (item.get_local_id(0)==0)
-//     for (auto wi=0; wi<419; wi++){
-//      out << "off[" << wi << "]=" << hist->off[wi] << "\n";
-//      }
-      
-//      if (item.get_local_id(0)==0){
-//      
-//      for (auto j = item.get_local_id(0); j < Hist::totbins(); j ++) {
-//        out <<  hist->off[j] << " ";      
-//      }
-//      }
-      
-
-      
       if (item.get_local_id(0) < 32u)
         ws[item.get_local_id(0)] = 0; 
-//           
-//      item.barrier();
-//      if(item.get_local_id(0)==0){
-//        for (auto j = 0; j < (int)Hist::totbins(); j ++) {
-//        out << hist->off + j << ": "<< hist->off[j] << sycl::endl;
-//        }
-//        out << " ------------------------------------- "<< sycl::endl;
-//        out << ws << "\n -------------------------------------" << sycl::endl;
-//      }
-//      
-      item.barrier();
+      
+    item.barrier();
       hist->finalize(item, out, ws);
       item.barrier();
-//     
-//      if(item.get_local_id(0)==0){
-//        for (auto j = 0; j < (int)Hist::totbins(); j ++) {
-//         out << hist->off + j << ": "<< hist->off[j] << sycl::endl;
-//        }
-//        out << " ------------------------------------- "<< sycl::endl;
-//        out << ws << "\n -------------------------------------" << sycl::endl;
-//      }
-//      
-//      item.barrier();
-      
-      
-//       for (int i = first; i < *msize; i += item.get_local_range(0)) {
-//       out << hist->off[y[i]] << " ";
-//      }
-      
-     int sum = 0;
+     
     for (auto j = 0; j < (int)Hist::totbins(); j ++) {
     if (id[j] == 9999 && j >= (int)Hist::totbins()) {  // skip invalid pixels
         continue;
@@ -137,39 +81,7 @@ void kernel(sycl::stream out, sycl::nd_item<1> item, uint16_t const* __restrict_
     item.barrier();
     
     if (item.get_local_id(0)==0){
-     out << sum << " ";
+     out << "Offest sum: " << sum << "\n";
      }
-      
-      //out << hist->size() << " ";
-      
-//      for (int i = first; i < *msize; i += item.get_local_range(0)) {
-//      if (id[i] == 9999)  // skip invalid pixels
-//        continue;
-//      hist->fill(y[i], i - firstPixel);
-////      //out << "y[" << i << "]=" << y[i] << ", firstPixel=" << firstPixel << ", i-firstPixel=" << i-firstPixel << "\n";
-//      }
-//      
-//      if(hist->size()>500)
-//      out << hist->size() << " ";
-      //out << hist->size() << " ";
-
-//    int sum = 0;
-//    for (auto j = 0; j < (int)Hist::totbins(); j ++) {
-//    if (id[j] == 9999 && j >= (int)Hist::totbins()) {  // skip invalid pixels
-//        continue;
-//      }
-//      
-//      sum+=hist->off[j];
-//    }
-//    
-//    item.barrier();
-//    
-//    if (item.get_local_id(0)==0 && firstPixel == 0){
-//     out << sum << " ";
-//     }
-     
-   // item.barrier();
-   // if(hist->size()>500)
-    //out << hist->size() << " ";
       
 }

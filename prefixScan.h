@@ -30,53 +30,24 @@ void __forceinline warpPrefixScan(T* c, uint32_t i, uint32_t mask, sycl::nd_item
       size_t idtest = item.get_sub_group().get_local_linear_id();
       uint32_t local_valtest = (first < size ? 1u : 0u) << idtest;
       
-//       item.barrier();
-//       for (auto i = first; i < size; i += item.get_local_range(0)) {
-//       if(item.get_group(0)==0)
-//       out << size << " ";
-//       }
-//      if (first==0)
-//        out << "c=" << c << " ws=" << ws << "\n";
-//      if (first==0)
-//        out << "\n";
-//      for (auto i = first; i < size; i += item.get_local_range(0)) {
-//        out << c[i] << " ";
-//      }
       auto mask = sycl::reduce_over_group(item.get_sub_group(), local_valtest, sycl::plus<>());
       for (auto i = first; i < size; i += item.get_local_range(0)) {
        
-     // out << i / 32 << " ";	      
-          //item.barrier();
-//        if(item.get_group(0)==0)
-          //out << c[i]<< " ";
-       // item.barrier();
-       // out << c[i] << " ";
-
        warpPrefixScan(c, i, mask, item, out);
         
-        //item.barrier();
-       // out << c[i] << " ";
        auto laneId = item.get_local_id(0) & 0x1f;      
        auto warpId = i / 32;
        if (31 == laneId){
-         //out << i << ": " << c[64] << "\t";
-         auto temp = c[i];
-         ws[warpId] = temp;
-         //out << ws+warpId <<  ": "<< ws[warpId] << "\n"; 
-         //out << c[64] << "\n"; 
+         out << i << ": " << c[64] << "\t"; // BEFORE ASSIGNMENT
+         ws[warpId] = c[i];
+         out << i << ": " << c[64] << "\n"; // AFTER ASSIGNMENT
               }
             
-        //out << ws[warpId] << " ";                  
         size_t idtest = item.get_sub_group().get_local_linear_id();
         uint32_t local_valtest = ((i + item.get_local_range(0)) < size ? 1u : 0u) << idtest;          
         mask = sycl::reduce_over_group(item.get_sub_group(), local_valtest, sycl::plus<>());
       }
       
-//      if (first==0)
-//        out << "\n";
-//      for (auto i = first; i < size; i += item.get_local_range(0)) {
-//        out << c[i] << " ";
-//      }
       //Same as above (0)
       item.barrier(sycl::access::fence_space::local_space);
       if (size <= 32)
@@ -93,9 +64,6 @@ void __forceinline warpPrefixScan(T* c, uint32_t i, uint32_t mask, sycl::nd_item
 ////      //Same as above (0)
       item.barrier(sycl::access::fence_space::local_space);
 
-      //__CUDA_ARCH__
-      //for (uint32_t i = 1; i < size; ++i)
-      //  c[i] += c[i - 1];
 
     }
 
